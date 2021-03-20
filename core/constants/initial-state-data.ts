@@ -1,0 +1,1 @@
+export const INITIAL_STATE: {[key:string]: any} = typeof window !== 'undefined' ? (window.__NEXT_DATA__?.props.pageProps?.initialState || {}) : {}
