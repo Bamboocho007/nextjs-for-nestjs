@@ -1,0 +1,16 @@
+.articles-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.control-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.control-button {
+  + .control-button {
+    margin-left: 10px;
+  }
+}
