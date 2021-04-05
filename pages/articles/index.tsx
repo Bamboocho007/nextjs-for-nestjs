@@ -1,42 +1,37 @@
 import { observer } from 'mobx-react-lite'
 import { GetServerSideProps } from 'next'
-import React, { useEffect } from 'react'
+import React, { FunctionComponent, useEffect, useState } from 'react'
 import styles from './articles-component.module.scss'
-import { deleteArticleApi } from '../../api/fetches'
 import { Preloader } from '../../shared/components/preloader/preloader-component'
 import { ArticleItemComponent } from './components/article-item/article-item-component'
-import { articlesStore } from './store'
 import { addClass } from '../../core/utils'
-import { ArticlesControlsComponent } from './components/articles-controls/articles-controls-component'
 import { userStore } from '../../core/auth/user-store'
-import { FETCH_ALL_ARTICLES_ACTION } from './store/articles-store-actions'
+import { fetchAllArticlesApi } from '../../api/fetches'
+import { Article } from '../../api/interfaces'
+import { useRouter } from 'next/router'
 
-export default observer(function articlesComponent() {
-
-  useEffect(() => {
-    if(!articlesStore?.articles?.data) {
-      FETCH_ALL_ARTICLES_ACTION()
+const articlesComponent: FunctionComponent<{articles: Article[]}> = function articlesComponent({ articles }) {
+  const [articlesList, setArticles] = useState({data: articles, loading: false, error: null})
+  const router = useRouter()
+  
+  const goToEditPage = (id: number) => {
+    if(userStore.currentUser) {
+      router.push('./create-edit' + '?articleId=' + id)
     }
-  }, [])
-
-  const onDeleteHandler = (articleId: number) => {
-    deleteArticleApi(articleId).then(res => {
-      FETCH_ALL_ARTICLES_ACTION()
-    })
   }
 
   return (
     <div>
       <div className={addClass('container', styles['articles-container'])}>
-        <ArticlesControlsComponent />
         {
-          articlesStore?.articles.loading
+          articlesList?.loading
             ? <Preloader/>
             : <div className={styles['articles-list']}>
-              {articlesStore.articles?.data?.map(article => 
+              {articlesList.data?.map(article => 
                 <ArticleItemComponent 
+                  onclickHandler={() => goToEditPage(article.id)}
                   canDelete={article.userId === userStore.currentUser?.id}
-                  deleteHandler={onDeleteHandler} 
+                  deleteHandler={() => {}} 
                   article={article} key={article.id}/>
               )}
             </div>
@@ -44,16 +39,16 @@ export default observer(function articlesComponent() {
       </div>
     </div>
   )
-})
+}
+
+export default observer(articlesComponent)
 
 export const getServerSideProps: GetServerSideProps =  async (context) => {
-  await FETCH_ALL_ARTICLES_ACTION()
+  const articles = await fetchAllArticlesApi()
 
   return {
     props: {
-      initialState: {
-        articles: articlesStore.articles.data
-      }
+      articles: articles.data
     }
   }
 }

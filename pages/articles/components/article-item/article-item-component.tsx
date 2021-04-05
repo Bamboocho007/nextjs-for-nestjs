@@ -6,9 +6,10 @@ export const ArticleItemComponent: FunctionComponent<{
   article: Article, 
   deleteHandler: (articleId: number) => void,
   canDelete: boolean
-}> = ({ article, deleteHandler, canDelete }) => {
+  onclickHandler: any
+}> = ({ article, deleteHandler, canDelete, onclickHandler }) => {
   return (
-    <div className={styles['article-container']}>
+    <div className={styles['article-container']} onClick={onclickHandler}>
       {
         canDelete && 
         <button className={styles['article-delete-btn']} onClick={() => deleteHandler(article.id)}>

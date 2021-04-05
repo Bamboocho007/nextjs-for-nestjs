@@ -5,5 +5,6 @@ export type Article = {
   creationDate: string,
   imageUrl: string,
   imageTrumbUrl: string,
-  userId: number
+  userId: number,
+  topicId: number
 }
