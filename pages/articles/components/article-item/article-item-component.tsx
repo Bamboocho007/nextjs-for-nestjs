@@ -1,37 +1,44 @@
-import React, { FunctionComponent } from 'react'
-import styles from './article-item-component.module.scss'
+import React, { ForwardedRef, forwardRef } from 'react'
+import s from './article-item-component.module.scss'
 import { Article } from '../../../../api/interfaces'
 
-export const ArticleItemComponent: FunctionComponent<{
+export const ArticleItemComponent = forwardRef<any, {
   article: Article, 
   deleteHandler: (articleId: number) => void,
   canDelete: boolean
-  onclickHandler: any
-}> = ({ article, deleteHandler, canDelete, onclickHandler }) => {
+  onClick?: any,
+  href?: string,
+  ref: ForwardedRef<any>
+}>(({ article, deleteHandler, canDelete, onClick, href}, ref) => {
   return (
-    <div className={styles['article-container']} onClick={onclickHandler}>
+    <div className={s['article-container']}>
       {
         canDelete && 
-        <button className={styles['article-delete-btn']} onClick={() => deleteHandler(article.id)}>
-          D
-        </button>
+        <div className={s['edit-article-container']}>
+          <a className={s['edit-article-btn']} onClick={onClick} href={href} ref={ref}>
+            E
+          </a>
+          <button className={s['article-delete-btn']} onClick={() => deleteHandler(article.id)}>
+            D
+          </button>
+        </div>
       }
-      <div className={styles['article-image-wr']}>
+      <div className={s['article-image-wr']}>
         <img src={article.imageTrumbUrl} alt="article image"/>
       </div>
-      <div className={styles['article-content']}>
-        <div className={styles['article-title-line']}>
-          <p className={styles['article-title']}>
+      <div className={s['article-content']}>
+        <div className={s['article-title-line']}>
+          <p className={s['article-title']}>
             { article.title }
           </p>
-          <time className={styles['article-created-at']}>
+          <time className={s['article-created-at']}>
             { new Intl.DateTimeFormat().format(new Date(article.creationDate)) }
           </time>
         </div>
-        <p className={styles['article-text']}>
+        <p className={s['article-text']}>
           { article.text }
         </p>
       </div>
     </div>
   )
-}
+})

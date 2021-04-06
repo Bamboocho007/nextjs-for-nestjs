@@ -1,17 +1,19 @@
 import { Button, MenuItem, Select, TextField } from '@material-ui/core'
-import React, { ChangeEvent, FunctionComponent, useState } from 'react'
+import React, { ChangeEvent, FunctionComponent, useEffect, useState } from 'react'
 import s from './add-article-form-component.module.scss'
 import { useForm, Controller } from 'react-hook-form'
 import { NewArticleForm } from '../../../interfaces/new-article-form.interface'
 import { Article } from '../../../../../api/interfaces'
 import { ArticleTopic } from '../../../../../api/interfaces/article-topic.model'
+import { createArticleApi, updateArticleApi } from '../../../../../api/fetches'
 
 export const AddArticleFormComponent: FunctionComponent<{
-  articleDataForEdit: Article
+  articleDataForEdit?: Article
   articleTopics: ArticleTopic[]
 }> = ({ articleDataForEdit, articleTopics }) => {
   const [articleImage, setArticleImage] = useState(articleDataForEdit?.imageUrl || '')
-  const { register, control, reset, getValues } = useForm<NewArticleForm>({
+
+  const { register, control, reset, getValues, setValue } = useForm<NewArticleForm>({
     defaultValues: {
       text: articleDataForEdit?.text || '',
       title: articleDataForEdit?.title || '',
@@ -20,24 +22,31 @@ export const AddArticleFormComponent: FunctionComponent<{
   });
 
   const onSubmitHandle = () => {
-    
-    { console.log('getValues', getValues()) }
+    const formValue = getValues()
+    const createUpdateData = {...formValue, image: formValue.image[0]}
+
+    if(articleDataForEdit) {
+      updateArticleApi(createUpdateData, articleDataForEdit.id).then(res => {
+  
+      })
+    }
+    else {
+      createArticleApi(createUpdateData).then(res => {
+  
+      })
+    }
   }
   const onResetHandle = () => {
     reset({
-      title: articleDataForEdit.title,
-      text: articleDataForEdit.text,
-      topicId: articleDataForEdit.topicId,
+      title: articleDataForEdit?.title || '',
+      text: articleDataForEdit?.text || '',
+      topicId: articleDataForEdit?.topicId || '' as any,
       image: []
     })
     setArticleImage(articleDataForEdit?.imageUrl || '')
   }
-  const test = (event: ChangeEvent<HTMLInputElement>) => {
-    const fileReader = new FileReader()
-    fileReader.onload = () => {
-      setArticleImage(fileReader.result as string)
-    }
-    fileReader.readAsDataURL(event.target.files[0])
+  const onImageChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
+    setArticleImage(URL.createObjectURL(event.target.files[0]))
   }
 
   return (
@@ -53,7 +62,7 @@ export const AddArticleFormComponent: FunctionComponent<{
             accept="image/*" 
             id="button-file" 
             type="file" 
-            onChange={(e) => test(e)}
+            onChange={(e) => onImageChangeHandler(e)}
             multiple={false} 
             ref={register} name="image"/>
         </label>

@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { GetServerSideProps } from 'next'
-import React, { FunctionComponent, useEffect, useState } from 'react'
-import styles from './articles-component.module.scss'
+import React, { FunctionComponent, useState } from 'react'
+import s from './articles-component.module.scss'
 import { Preloader } from '../../shared/components/preloader/preloader-component'
 import { ArticleItemComponent } from './components/article-item/article-item-component'
 import { addClass } from '../../core/utils'
@@ -9,30 +9,33 @@ import { userStore } from '../../core/auth/user-store'
 import { fetchAllArticlesApi } from '../../api/fetches'
 import { Article } from '../../api/interfaces'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 const articlesComponent: FunctionComponent<{articles: Article[]}> = function articlesComponent({ articles }) {
   const [articlesList, setArticles] = useState({data: articles, loading: false, error: null})
-  const router = useRouter()
-  
-  const goToEditPage = (id: number) => {
-    if(userStore.currentUser) {
-      router.push('./create-edit' + '?articleId=' + id)
-    }
-  }
+  const {route} = useRouter()
 
   return (
     <div>
-      <div className={addClass('container', styles['articles-container'])}>
+      <div className={addClass('container', s['articles-container'])}>
+        { userStore.currentUser &&
+          <div className={s['article-controls']}>
+            <a className={s['add-new-btn']} href={route + '/create-edit'}>
+              N
+            </a>
+          </div>
+        }
         {
           articlesList?.loading
             ? <Preloader/>
-            : <div className={styles['articles-list']}>
+            : <div className={s['articles-list']}>
               {articlesList.data?.map(article => 
-                <ArticleItemComponent 
-                  onclickHandler={() => goToEditPage(article.id)}
-                  canDelete={article.userId === userStore.currentUser?.id}
-                  deleteHandler={() => {}} 
-                  article={article} key={article.id}/>
+                <Link href={route + '/create-edit' + '?articleId=' + article.id} passHref key={article.id}>
+                  <ArticleItemComponent 
+                    canDelete={article.userId === userStore.currentUser?.id}
+                    deleteHandler={() => {}} 
+                    article={article}/>
+                </Link>
               )}
             </div>
         }
